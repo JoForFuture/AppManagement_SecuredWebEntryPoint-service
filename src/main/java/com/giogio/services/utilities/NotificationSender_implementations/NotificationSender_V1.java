@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 import com.giogio.services.utilities.NotificationSender;
 
 @Primary
-@Qualifier("notificationSenderV1")
+@Qualifier("notificationSender_V1")
 @Component
-public class NotificationSenderV1 implements NotificationSender{
+public class NotificationSender_V1 implements NotificationSender{
 
 	@Override
 	public void notifyMessage(String message) {

@@ -9,9 +9,9 @@ import com.giogio.entities.UserEntity;
 import com.giogio.services.utilities.UserEntityUpdateUtilities;
 
 @Primary
-@Qualifier("userEntityUpdateUtilitiesImplV1")
+@Qualifier("userEntityUpdateUtilitiesImpl_V1")
 @Component
-public class UserEntityUpdateUtilitiesImplV1 implements UserEntityUpdateUtilities{
+public class UserEntityUpdateUtilitiesImpl_V1 implements UserEntityUpdateUtilities{
 
 	@Override
 	public void updateNameFromUserDTOIfPresent(UserDTO userDTO, UserEntity userEntity) {

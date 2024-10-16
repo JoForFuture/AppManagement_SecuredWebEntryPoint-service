@@ -2,12 +2,16 @@ package com.giogio.services.utilities.findByFilterSelection_implementations;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.giogio.entities.UserEntity;
 import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
 
+@Primary
+@Qualifier("FindByFilterSelectionImpl_V1")
 @Component
 public class FindByFilterSelectionImpl_V1 implements FindByFilterSelection {
 	

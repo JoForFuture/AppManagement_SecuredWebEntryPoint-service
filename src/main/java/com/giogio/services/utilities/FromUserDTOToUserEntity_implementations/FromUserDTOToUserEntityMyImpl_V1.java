@@ -9,9 +9,9 @@ import com.giogio.entities.UserEntity;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
 
 @Primary
-@Qualifier("fromUserDTOToUserEntityMyImpl")
+@Qualifier("fromUserDTOToUserEntityMyImpl_V1")
 @Component
-public class FromUserDTOToUserEntityMyImpl implements FromUserDTOToUserEntity{
+public class FromUserDTOToUserEntityMyImpl_V1 implements FromUserDTOToUserEntity{
 
 	@Override
 	public UserEntity doMapping(UserDTO userDTO, String email){
