@@ -1,0 +1,16 @@
+#=========================APPLICATION NAME
+spring:
+  application:
+    name: SecuredWebEntryPoint-service
+  datasource:
+    url: jdbc:mysql://localhost:3307/mydb
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: user
+    password: userpassword
+  jpa:
+    hibernate:
+       ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+server:
+  port: 8082
+
