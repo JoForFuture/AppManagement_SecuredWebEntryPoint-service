@@ -19,7 +19,7 @@ public class SecuredWebEntryPoint {
 	public static void main(String[] args) {
 		SpringApplication.run(SecuredWebEntryPoint.class, args);
 	}
-	
+	//UserService userService
 	@Bean
 	CommandLineRunner commandLineRunner(UserService userService) {
 		return args->{
@@ -29,7 +29,16 @@ public class SecuredWebEntryPoint {
 					.builder()
 					.nameDTO("First-name")
 					.surnameDTO("First-surname")
+					.ageDTO(19)
 					.build();
+			
+			UserDTO user_2=UserDTO
+					.builder()
+					.nameDTO("Second-name")
+					.surnameDTO("Second-surname")
+					.ageDTO(19)
+					.build();
+			
 			
 			String user_1_email="first@email.com";
 			String user_2_email="second@email.com";
@@ -53,7 +62,7 @@ public class SecuredWebEntryPoint {
 			userService.getAllUsers().forEach(System.out::println);
 			
 //			System.err.println( userService.getUserById(5l).equals(userService.getUserById(4l)));
-
+			userService.updateUserRecordByDto( user_2, user_1_id);
 
   
 			  

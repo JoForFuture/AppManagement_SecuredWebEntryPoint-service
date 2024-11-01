@@ -19,9 +19,10 @@ public interface UserService {
 
 	List<UserEntity> getAllUsers() throws NotFoundException;
 
-	void updateUserRecordByDto(UserDTO userDTO,Object filter) throws IllegalArgumentException, NoSuchElementException;
+	void updateUserRecordByDto(UserDTO userDTO ,Object filter) throws IllegalArgumentException, NoSuchElementException;
 	
 	boolean deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException;
+	
 
 
 

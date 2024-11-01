@@ -1,4 +1,4 @@
-package com.giogio.services.utilities.NotificationSender_implementations;
+package com.giogio.services.utilities.implementations;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;

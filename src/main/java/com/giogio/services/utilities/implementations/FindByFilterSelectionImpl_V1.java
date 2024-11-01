@@ -1,4 +1,4 @@
-package com.giogio.services.utilities.findByFilterSelection_implementations;
+package com.giogio.services.utilities.implementations;
 
 import java.util.Optional;
 

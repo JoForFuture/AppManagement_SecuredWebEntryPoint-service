@@ -3,11 +3,11 @@ package com.giogio.services;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import com.giogio.DTO.UserDTO;
 import com.giogio.entities.UserEntity;
@@ -15,15 +15,14 @@ import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
 import com.giogio.services.utilities.NotificationSender;
-import com.giogio.services.utilities.UserEntityUpdateUtilities;
 
+@Validated
 @Service
 public class UserServiceImpl implements UserService {
 
 	
 	private UserRepository userRepository;
 	private FromUserDTOToUserEntity fromUserDTOToUserEntity;
-	private UserEntityUpdateUtilities userEntityUpdateUtilities;
 	private NotificationSender notificationSender;
 	private FindByFilterSelection findByFilterSelection;
 	
@@ -32,15 +31,14 @@ public class UserServiceImpl implements UserService {
 	public UserServiceImpl(
 			UserRepository userRepository,
 			FromUserDTOToUserEntity fromUserDTOToUserEntity,
-			UserEntityUpdateUtilities userEntityUpdateUtilities,
 			NotificationSender notificationSender,
 			FindByFilterSelection findByFilterSelection
 			) {
 		this.userRepository=userRepository;
 		this.fromUserDTOToUserEntity=fromUserDTOToUserEntity;
-		this.userEntityUpdateUtilities=userEntityUpdateUtilities;
 		this.notificationSender=notificationSender;
 		this.findByFilterSelection=findByFilterSelection;
+		
 	}
 	
 	
@@ -56,7 +54,7 @@ public class UserServiceImpl implements UserService {
  */
 	@Transactional
 	@Override
-	public void addUserIfNotPresent(UserDTO userDTO, String email) throws IllegalArgumentException{
+	public void addUserIfNotPresent( UserDTO userDTO, String email) throws IllegalArgumentException{
 		
 		 userRepository
 		 .findUserEntityByEmail(email)
@@ -74,6 +72,49 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	//--------------------------READ--------------------------
+	
+	@Transactional
+	@Override
+	public UserEntity getUserByEmailOrId(Object filter) throws NoSuchElementException { 
+	
+		return 
+				findByFilterSelection
+						.getOptionalUserEntity(filter)
+						.map(
+								(user)->{
+									notificationSender.notifyMessage("user found");
+									return user;
+									}
+								)
+						.orElseThrow(
+								() -> {
+									notificationSender.notifyMessage("User not found");
+									return new NoSuchElementException("User not found");
+					    });
+	}
+	
+	
+	
+	
+	
+	@Transactional 
+	@Override
+	public List<UserEntity> getAllUsers() throws NotFoundException {
+		
+		return 
+				userRepository
+						.findAll()
+						.stream()
+						.map(
+								(list)->{
+									notificationSender.notifyMessage("all users getted");
+									return list;
+								}
+						)
+						.toList();
+			
+		
+	}
 
 //	/**
 //	 * @param Long id
@@ -131,66 +172,69 @@ public class UserServiceImpl implements UserService {
 //		}
 //	
 	
-	@Transactional
-	@Override
-	public UserEntity getUserByEmailOrId(Object filter) throws NoSuchElementException { 
-	
-		return 
-				findByFilterSelection
-						.getOptionalUserEntity(filter)
-						.map(
-								(user)->{
-									notificationSender.notifyMessage("user found");
-									return user;
-									}
-								)
-						.orElseThrow(
-								() -> {
-									notificationSender.notifyMessage("User not found");
-									return new NoSuchElementException("User not found");
-					    });
-	}
-	
-	
-	
-	
-	
-	@Transactional 
-	@Override
-	public List<UserEntity> getAllUsers() throws NotFoundException {
-		
-		return 
-				userRepository
-				.findAll()
-				.stream()
-				.map(
-						(list)->{
-							notificationSender.notifyMessage("all users getted");
-							return list;
-							}
-						)
-				.toList();
-		
-	}
+
 
 	//--------------------------UPDATE --------------------------
 	
 	@Transactional
 	@Override
-	public void updateUserRecordByDto(UserDTO userDTO, Object filter) throws IllegalArgumentException, NoSuchElementException {
-		
+	public void updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue) throws IllegalArgumentException, NoSuchElementException {
+	
+//		FIGOOOOO
+		userDTO
+			.nameNotNullAndNotEmpty("StingaProva", (s)->{
+				return userDTO;
+			});	
+			
 		findByFilterSelection
-			.getOptionalUserEntity(filter)
+			.getOptionalUserEntity(searchFilterValue)
 			.map(
-					user->{
-						userEntityUpdateUtilities.updateNameFromUserDTOIfPresent(userDTO, user);
-						notificationSender.notifyMessage("user update successfully");
-						return 
-								userRepository.save(user);
+					user->{//void 
+						Optional.of(userDTO.getNameDTO())
+									.filter(u->userDTO.getNameDTO() != null && !userDTO.getNameDTO().isBlank())
+									.ifPresentOrElse(
+												value->user.setName(value),
+											()->{
+												System.out.println("value not modified");
+											});
+						
+						Optional.of(userDTO.getSurnameDTO())
+						.filter(u->userDTO.getSurnameDTO() != null && !userDTO.getSurnameDTO().isBlank())
+						.ifPresentOrElse(
+									value->user.setSurname(value),
+								()->{
+									System.out.println("value not modified");
+								});
+						
+						Optional.of(userDTO.getAgeDTO())
+						.filter(u->userDTO.getAgeDTO() != null)
+						.ifPresentOrElse(
+									value->user.setAge(value),
+								()->{
+									System.out.println("value not modified");
+								});
+					
+						
+						return user;
 						}
-					);
+					) .ifPresentOrElse(
+							 (user)->{
+									userRepository.save(user);
+									notificationSender.notifyMessage("user : "+user+" update successfully");
+								 }
+							 ,
+							 ()->{
+									notificationSender.notifyMessage("user : "+String.valueOf(searchFilterValue) +" update failed");
+
+								 }
+							 );
 			
 	}
+	
+
+	
+
+	
 	
 	
 

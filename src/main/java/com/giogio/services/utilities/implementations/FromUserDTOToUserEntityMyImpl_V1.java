@@ -1,4 +1,4 @@
-package com.giogio.services.utilities.FromUserDTOToUserEntity_implementations;
+package com.giogio.services.utilities.implementations;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
@@ -18,6 +18,7 @@ public class FromUserDTOToUserEntityMyImpl_V1 implements FromUserDTOToUserEntity
 		return UserEntity.builder()
 						.name(userDTO.getNameDTO())
 						.surname(userDTO.getSurnameDTO())
+						.age(userDTO.getAgeDTO())
 						.email(email)
 						.build();
 	
