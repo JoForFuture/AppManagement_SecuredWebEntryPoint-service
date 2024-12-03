@@ -36,7 +36,7 @@ public class SecuredWebEntryPoint {
 					.builder()
 					.nameDTO("Second-name")
 					.surnameDTO("Second-surname")
-					.ageDTO(19)
+					.ageDTO(27)
 					.build();
 			
 			
@@ -48,8 +48,8 @@ public class SecuredWebEntryPoint {
 
 			
 			userService.addUserIfNotPresent(
-					 user_1 ,
-					 user_1_email
+					 user_2,
+					 user_2_email
 					);
 			try {
 				Stream.of(userService.getUserByEmailOrId(user_1_email) )
@@ -59,10 +59,12 @@ public class SecuredWebEntryPoint {
 				System.err.println("---NoSuchElementException---");
 			}
 		
-			userService.getAllUsers().forEach(System.out::println);
 			
 //			System.err.println( userService.getUserById(5l).equals(userService.getUserById(4l)));
-			userService.updateUserRecordByDto( user_2, user_1_id);
+			userService.updateUserRecordByDto( user_1, user_1_id);
+			
+			userService.getAllUsers().forEach(System.out::println);
+
 
   
 			  

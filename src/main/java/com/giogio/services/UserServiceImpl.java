@@ -106,9 +106,9 @@ public class UserServiceImpl implements UserService {
 						.findAll()
 						.stream()
 						.map(
-								(list)->{
-									notificationSender.notifyMessage("all users getted");
-									return list;
+								(user)->{
+									notificationSender.notifyMessage("user "+user.getEmail()+" retrived");
+									return user;
 								}
 						)
 						.toList();
@@ -181,10 +181,10 @@ public class UserServiceImpl implements UserService {
 	public void updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue) throws IllegalArgumentException, NoSuchElementException {
 	
 //		FIGOOOOO
-		userDTO
-			.nameNotNullAndNotEmpty("StingaProva", (s)->{
-				return userDTO;
-			});	
+//		userDTO
+//			.nameNotNullAndNotEmpty("StingaProva", (s)->{
+//				return userDTO;
+//			});	
 			
 		findByFilterSelection
 			.getOptionalUserEntity(searchFilterValue)
