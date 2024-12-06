@@ -11,14 +11,14 @@ import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
 
 @Primary
-@Qualifier("FindByFilterSelectionImpl_V1")
+@Qualifier("FindByFilterSelectionImpl_v01")
 @Component
-public class FindByFilterSelectionImpl_V1 implements FindByFilterSelection {
+public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 	
 	private final UserRepository userRepository;
 	
 	
-	public FindByFilterSelectionImpl_V1(UserRepository userRepository) {
+	public FindByFilterSelectionImpl_v01(UserRepository userRepository) {
 		this.userRepository=userRepository;
 	}
 
