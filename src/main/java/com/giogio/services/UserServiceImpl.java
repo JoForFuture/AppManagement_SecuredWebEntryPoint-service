@@ -1,5 +1,6 @@
 package com.giogio.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -54,20 +55,30 @@ public class UserServiceImpl implements UserService {
  */
 	@Transactional
 	@Override
-	public void addUserIfNotPresent( UserDTO userDTO, String email) throws IllegalArgumentException{
+	public Long addUserIfNotPresent( UserDTO userDTO, String email) throws IllegalArgumentException{
 		
-		 userRepository
+		if(userDTO==null||email==null||email.isBlank()) {
+			throw new IllegalArgumentException("at least one argument is null");
+		}
+		
+		UserEntity idStore=UserEntity.builder().build();
+		
+		userRepository
 		 .findUserEntityByEmail(email)
 		 .ifPresentOrElse(
 				 (user)->{
 					 notificationSender.notifyMessage("user with name: \" "+user.getName()+" \" already exist");
+					 idStore.setId(-1l);
 					 }
 				 ,
 				 ()->{
 					 UserEntity savedUser=userRepository.save(fromUserDTOToUserEntity.doMapping(userDTO,email));
 					 notificationSender.notifyMessage("user with name: \" "+ savedUser +" \" saved");
+					 idStore.setId(savedUser.getId());
 					 }
 				 );
+	
+		  return idStore.getId();
 		 
 	}
 	

@@ -2,6 +2,7 @@ package com.giogio.services;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 
@@ -10,7 +11,7 @@ import com.giogio.entities.UserEntity;
 
 public interface UserService {
 		
-	void addUserIfNotPresent(UserDTO userDTO, String email)throws IllegalArgumentException;
+	Long addUserIfNotPresent(UserDTO userDTO, String email)throws IllegalArgumentException;
 	
 	UserEntity getUserByEmailOrId(Object filter) throws NoSuchElementException;
 

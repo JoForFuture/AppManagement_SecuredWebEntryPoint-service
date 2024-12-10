@@ -26,7 +26,7 @@ public class FindByFilterSelectionImpl_v01Test {
 	@Test
 	public void getOptionalUserEntityTest() {
 		
-		Optional<UserEntity> user=Optional.of(
+		final Optional<UserEntity> user=Optional.of(
 				UserEntity.builder()
 							.surname("surname01")
 							.name("name01")
@@ -34,13 +34,16 @@ public class FindByFilterSelectionImpl_v01Test {
 							.email("user01@email.com")
 							.build()
 				);
-		String filter="user01@email.com";
+		
+		final String filter="user01@email.com";
 		
 		Mockito.when(userRepository.findUserEntityByEmail((String)filter)).thenReturn(user);
 		
 		Optional<UserEntity> userFromDB=findByFilterSelectionImpl_v01.getOptionalUserEntity(filter);
 		
 		assertEquals(userFromDB.get().getEmail(), filter);
+		
+		
 	}
 
 }

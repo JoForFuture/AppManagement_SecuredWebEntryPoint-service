@@ -35,5 +35,4 @@ public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 			throw new RuntimeException("wrong filter type");
 		}
 	}
-
 }
