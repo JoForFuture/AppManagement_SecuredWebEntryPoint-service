@@ -15,6 +15,7 @@ public class UserDTO implements UserDTO_FI<UserDTO>{
 	private String nameDTO;
 	private String surnameDTO;
 	private Integer ageDTO;
+	private String emailDTO;
 	
 	@Override
 	public UserDTO myStream() {

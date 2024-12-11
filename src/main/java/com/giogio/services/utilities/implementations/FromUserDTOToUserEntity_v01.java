@@ -12,7 +12,7 @@ import com.giogio.services.utilities.FromUserDTOToUserEntity;
 public class FromUserDTOToUserEntity_v01 implements FromUserDTOToUserEntity{
 
 	@Override
-	public UserEntity doMapping(UserDTO userDTO, String email)throws NullPointerException{
+	public UserEntity doMapping(UserDTO userDTO)throws NullPointerException{
 		if(userDTO==null) {
 			throw new NullPointerException("userDTO passed as argument is null");
 		}
@@ -20,7 +20,7 @@ public class FromUserDTOToUserEntity_v01 implements FromUserDTOToUserEntity{
 						.name(userDTO.getNameDTO())
 						.surname(userDTO.getSurnameDTO())
 						.age(userDTO.getAgeDTO())
-						.email(email)
+						.email(userDTO.getEmailDTO())
 						.build();
 	
 				} 

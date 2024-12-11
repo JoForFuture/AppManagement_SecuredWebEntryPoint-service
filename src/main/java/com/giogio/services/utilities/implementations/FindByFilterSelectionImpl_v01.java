@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.giogio.entities.UserEntity;
 import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
+import com.giogio.services.utilities.SearchFilterType;
 
 @Primary
 @Qualifier("FindByFilterSelectionImpl_v01")
@@ -23,16 +24,21 @@ public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 	}
 
 	@Override
-	public Optional<UserEntity> getOptionalUserEntity(Object filter){
+	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterType searchFilterType){
 		Optional<UserEntity> user;
-		if(filter.getClass().equals(Long.class)) {
-			user=userRepository.findById((Long)filter);
-			return user;
-		}else if(filter.getClass().equals(String.class)){	
+		
+		
+		switch(searchFilterType) {
+		case EMAIL:
 			user=userRepository.findUserEntityByEmail((String)filter);
 			return user;
-		}else {
+		case ID:
+			user=userRepository.findUserEntityById((Long)filter);
+			return user;
+		default:
 			throw new RuntimeException("wrong filter type");
 		}
+				
+			
 	}
 }

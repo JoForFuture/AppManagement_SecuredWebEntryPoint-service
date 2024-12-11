@@ -21,30 +21,29 @@ public class FromUserDTOToUserEntity_v02Test {
 	}
 	
 	@Test
-	public void doMapping_with_not_null_values(){
+	public void doMapping_withNotNullValues(){
 		UserDTO userDTO=UserDTO.builder()
 								.surnameDTO("Surname01")
 								.nameDTO("")
 								.ageDTO(20)
+								.emailDTO("First@email.com")
 								.build();
-		String email="First@email.com";
 		
-		UserEntity userEntity=fromUserDTOToUserEntity_v02.doMapping(userDTO, email);
+		UserEntity userEntity=fromUserDTOToUserEntity_v02.doMapping(userDTO);
 		
 		assertEquals(userEntity.getSurname(),userDTO.getSurnameDTO());
 		assertEquals(userEntity.getName(),userDTO.getNameDTO());
 		assertEquals(userEntity.getAge(),userDTO.getAgeDTO());
-		assertEquals(userEntity.getEmail(),email);
+		assertEquals(userEntity.getEmail(),userDTO.getEmailDTO());
 	
 	}
 	
 	@Test
-	public void doMapping_with_null_fields(){
+	public void doMapping_withNullFields(){
 		UserDTO userDTO=UserDTO.builder()
 								.build();
-		String email=null;
 		
-		UserEntity userEntity=fromUserDTOToUserEntity_v02.doMapping(userDTO, email);
+		UserEntity userEntity=fromUserDTOToUserEntity_v02.doMapping(userDTO);
 		
 		assertEquals(userEntity.getSurname(),"");
 		assertEquals(userEntity.getName(),"");
@@ -54,16 +53,17 @@ public class FromUserDTOToUserEntity_v02Test {
 	}
 	
 	@Test
-	public void doMapping_with_null_userDTO(){
-		UserDTO userDTO=null;
-		String email=null;
+	public void doMapping_withNullUserDTO(){
+		final UserDTO userDTONull=null;
 				
-		NullPointerException myNullPointerException=assertThrows(
-																	NullPointerException.class,
-																	()->fromUserDTOToUserEntity_v02.doMapping(userDTO, email)
+		IllegalArgumentException myNullPointerException01=assertThrows(
+																	IllegalArgumentException.class,
+																	()->fromUserDTOToUserEntity_v02.doMapping(userDTONull)
 																	);
 		
-		assertEquals(myNullPointerException.getMessage(),"userDTO passed as argument is null");
+		assertEquals(myNullPointerException01.getMessage(),"at least one argument is null");
+	
+
 	}
 	
 

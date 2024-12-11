@@ -23,59 +23,8 @@ public class SecuredWebEntryPoint {
 	@Bean
 	CommandLineRunner commandLineRunner(UserService userService,FromUserDTOToUserEntity mapper) {
 		return args->{
-			System.out.println("test-start");
+	
 			
-			UserDTO userDTO=UserDTO.builder()
-									.build();
-			System.out.println(userDTO.getSurnameDTO()+" "+userDTO.getAgeDTO());
-			
-			UserEntity userEntity=mapper.doMapping(userDTO, null);
-			
-			System.out.println(userEntity.getSurname()+" "+userEntity.getAge());
-
-			
-//			UserDTO user_1=UserDTO
-//					.builder()
-//					.nameDTO("First-name")
-//					.surnameDTO("First-surname")
-//					.ageDTO(19)
-//					.build();
-//			
-//			UserDTO user_2=UserDTO
-//					.builder()
-//					.nameDTO("Second-name")
-//					.surnameDTO("Second-surname")
-//					.ageDTO(27)
-//					.build();
-//			
-//			
-//			String user_1_email="first@email.com";
-//			String user_2_email="second@email.com";
-//			
-//			Long user_1_id=1l;
-//			Long user_2_id=2l;
-//
-//			
-//			userService.addUserIfNotPresent(
-//					 user_2,
-//					 user_2_email
-//					);
-//			try {
-//				Stream.of(userService.getUserByEmailOrId(user_1_email) )
-//				.forEach(System.out::println);
-////				userService.getUserByEmail(user_1_email)
-//			}catch(NoSuchElementException e) {
-//				System.err.println("---NoSuchElementException---");
-//			}
-//		
-//			
-////			System.err.println( userService.getUserById(5l).equals(userService.getUserById(4l)));
-//			userService.updateUserRecordByDto( user_1, user_1_id);
-//			
-//			userService.getAllUsers().forEach(System.out::println);
-//
-
-  
 			  
 		}
 		 ;

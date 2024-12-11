@@ -6,6 +6,6 @@ import com.giogio.entities.UserEntity;
 
 public interface FindByFilterSelection {
 	
-	public Optional<UserEntity> getOptionalUserEntity(Object filter);
+	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterType searchFilterType);
 
 }

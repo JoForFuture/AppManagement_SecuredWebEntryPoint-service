@@ -15,15 +15,15 @@ public class FromUserDTOToUserEntity_v02 implements FromUserDTOToUserEntity{
 
 
 	@Override
-	public UserEntity doMapping(UserDTO userDTO, String email)throws NullPointerException{
+	public UserEntity doMapping(UserDTO userDTO)throws IllegalArgumentException{
 		if(userDTO==null) {
-			throw new NullPointerException("userDTO passed as argument is null");
+			throw new IllegalArgumentException("at least one argument is null");
 		}
 		return UserEntity.builder()
 						.name(userDTO.getNameDTO()==null ? "" : userDTO.getNameDTO())
 						.surname(userDTO.getSurnameDTO()==null ? "" : userDTO.getSurnameDTO())
 						.age(userDTO.getAgeDTO()==null ? 0 : userDTO.getAgeDTO())
-						.email(email==null ? "":email)
+						.email(userDTO.getEmailDTO()==null ? "":userDTO.getEmailDTO())
 						.build();
 	
 				} 

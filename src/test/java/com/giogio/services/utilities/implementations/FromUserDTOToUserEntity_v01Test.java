@@ -21,30 +21,29 @@ public class FromUserDTOToUserEntity_v01Test {
 	}
 	
 	@Test
-	public void doMapping_with_not_null_values(){
+	public void doMapping_withNotNullValues(){
 		UserDTO userDTO=UserDTO.builder()
 								.surnameDTO("Surname01")
 								.nameDTO("")
 								.ageDTO(20)
+								.emailDTO("First@email.com")
 								.build();
-		String email="First@email.com";
 		
-		UserEntity userEntity=fromUserDTOToUserEntity_v01.doMapping(userDTO, email);
+		UserEntity userEntity=fromUserDTOToUserEntity_v01.doMapping(userDTO);
 		
 		assertEquals(userEntity.getSurname(),userDTO.getSurnameDTO());
 		assertEquals(userEntity.getName(),userDTO.getNameDTO());
 		assertEquals(userEntity.getAge(),userDTO.getAgeDTO());
-		assertEquals(userEntity.getEmail(),email);
+		assertEquals(userEntity.getEmail(),userDTO.getEmailDTO());
 	
 	}
 	
 	@Test
-	public void doMapping_with_null_fields(){
+	public void doMapping_withNullFields(){
 		UserDTO userDTO=UserDTO.builder()
 								.build();
-		String email=null;
 		
-		UserEntity userEntity=fromUserDTOToUserEntity_v01.doMapping(userDTO, email);
+		UserEntity userEntity=fromUserDTOToUserEntity_v01.doMapping(userDTO);
 		
 		assertEquals(userEntity.getSurname(),null);
 		assertEquals(userEntity.getName(),null);
@@ -54,13 +53,12 @@ public class FromUserDTOToUserEntity_v01Test {
 	}
 	
 	@Test
-	public void doMapping_with_null_userDTO(){
+	public void doMapping_withNullUserDTO(){
 		UserDTO userDTO=null;
-		String email=null;
 				
 		NullPointerException myNullPointerException=assertThrows(
 																	NullPointerException.class,
-																	()->fromUserDTOToUserEntity_v01.doMapping(userDTO, email)
+																	()->fromUserDTOToUserEntity_v01.doMapping(userDTO)
 																	);
 		
 		assertEquals(myNullPointerException.getMessage(),"userDTO passed as argument is null");

@@ -1,6 +1,5 @@
 package com.giogio.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -15,7 +14,9 @@ import com.giogio.entities.UserEntity;
 import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
+import com.giogio.services.utilities.FromUserEntityToUserDTO;
 import com.giogio.services.utilities.NotificationSender;
+import com.giogio.services.utilities.SearchFilterType;
 
 @Validated
 @Service
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
 	
 	private UserRepository userRepository;
 	private FromUserDTOToUserEntity fromUserDTOToUserEntity;
+	private FromUserEntityToUserDTO fromUserEntityToUserDTO;
 	private NotificationSender notificationSender;
 	private FindByFilterSelection findByFilterSelection;
 	
@@ -32,13 +34,16 @@ public class UserServiceImpl implements UserService {
 	public UserServiceImpl(
 			UserRepository userRepository,
 			FromUserDTOToUserEntity fromUserDTOToUserEntity,
+			FromUserEntityToUserDTO fromUserEntityToUserDTO,
 			NotificationSender notificationSender,
 			FindByFilterSelection findByFilterSelection
 			) {
 		this.userRepository=userRepository;
 		this.fromUserDTOToUserEntity=fromUserDTOToUserEntity;
+		this.fromUserEntityToUserDTO=fromUserEntityToUserDTO;
 		this.notificationSender=notificationSender;
 		this.findByFilterSelection=findByFilterSelection;
+		
 		
 	}
 	
@@ -47,7 +52,7 @@ public class UserServiceImpl implements UserService {
 /**
  * @param UserDTO userDTO
  * @param String email
- * @return void
+ * @return Long
  * @implNote Check if user is present by email parameter,
  * 			 if already exist it will send notification with this information and nothing else,
  * 			 otherwise,
@@ -55,46 +60,38 @@ public class UserServiceImpl implements UserService {
  */
 	@Transactional
 	@Override
-	public Long addUserIfNotPresent( UserDTO userDTO, String email) throws IllegalArgumentException{
+	public Long addUserIfNotPresent( UserDTO userDTO) throws IllegalArgumentException{
 		
-		if(userDTO==null||email==null||email.isBlank()) {
+		if(userDTO==null||userDTO.getEmailDTO()==null||userDTO.getEmailDTO().isBlank()) {
 			throw new IllegalArgumentException("at least one argument is null");
 		}
-		
-		UserEntity idStore=UserEntity.builder().build();
-		
-		userRepository
-		 .findUserEntityByEmail(email)
-		 .ifPresentOrElse(
-				 (user)->{
-					 notificationSender.notifyMessage("user with name: \" "+user.getName()+" \" already exist");
-					 idStore.setId(-1l);
-					 }
-				 ,
-				 ()->{
-					 UserEntity savedUser=userRepository.save(fromUserDTOToUserEntity.doMapping(userDTO,email));
-					 notificationSender.notifyMessage("user with name: \" "+ savedUser +" \" saved");
-					 idStore.setId(savedUser.getId());
-					 }
-				 );
-	
-		  return idStore.getId();
-		 
+		return userRepository
+					.findUserEntityByEmail(userDTO.getEmailDTO())
+					.map((user)->{
+						notificationSender.notifyMessage("user with name: \" "+user.getName()+" \" already exist");
+						return -1l;
+						})
+					.orElseGet(()->{
+						UserEntity savedUser=userRepository.save(fromUserDTOToUserEntity.doMapping(userDTO));
+						notificationSender.notifyMessage("user with name: \" "+ savedUser +" \" saved");
+						return savedUser.getId();
+					});		 
 	}
 	
+
 	//--------------------------READ--------------------------
 	
 	@Transactional
 	@Override
-	public UserEntity getUserByEmailOrId(Object filter) throws NoSuchElementException { 
+	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException { 
 	
 		return 
 				findByFilterSelection
-						.getOptionalUserEntity(filter)
+						.getOptionalUserEntity(filter,searchFilterType)
 						.map(
 								(user)->{
 									notificationSender.notifyMessage("user found");
-									return user;
+									return fromUserEntityToUserDTO.doMapping(user);
 									}
 								)
 						.orElseThrow(
@@ -127,69 +124,11 @@ public class UserServiceImpl implements UserService {
 		
 	}
 
-//	/**
-//	 * @param Long id
-//	 * @return UserEntity userEntity
-//	 * @implNote Find user by userId,
-//	 * 			 than,
-//	 * 			 if exist, will return it and send notification,
-//	 * 			 otherwise,
-//	 * 			 send notification and throws  NoSuchElementException
-//	 * @exception NoSuchElementException if no element was found
-//	 */
-//	@Transactional
-//	@Override
-//	public UserEntity getUserById(Long id) throws NoSuchElementException { 
-//		
-//		return userRepository.findUserEntityById(id)
-//			    .map(u -> {
-//			        notificationSender.notifyMessage("User found");
-//			        return u;
-//			    })
-//			    .orElseThrow(() -> {
-//			        notificationSender.notifyMessage("User not found");
-//			        return new NoSuchElementException("User with id " + id + " not found");
-//			    });
-//	
-//	}
-//	
-//	/**
-//	 * @param String email
-//	 * @return UserEntity userEntity
-//	 * @implNote Find user by user email,
-//	 * 			 than,
-//	 * 			 if exist, will return it and send notification,
-//	 * 			 otherwise,
-//	 * 			 send notification and throws  NoSuchElementException
-//	 * @exception NoSuchElementException if no element was found
-//	 */
-//	@Transactional
-//	@Override
-//	public UserEntity getUserByEmail(String email) throws NoSuchElementException { 
-//		
-//		return 
-//				userRepository
-//				.findUserEntityByEmail(email)
-//				.map(
-//						(u)->{
-//							notificationSender.notifyMessage("user found");
-//							return u;
-//							}
-//						)
-//				.orElseThrow(() -> {
-//			        notificationSender.notifyMessage("User not found");
-//			        return new NoSuchElementException("User with email " + email + " not found");
-//			    });				
-//		}
-//	
-	
-
-
 	//--------------------------UPDATE --------------------------
 	
 	@Transactional
 	@Override
-	public void updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue) throws IllegalArgumentException, NoSuchElementException {
+	public void updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException {
 	
 //		FIGOOOOO
 //		userDTO
@@ -198,7 +137,7 @@ public class UserServiceImpl implements UserService {
 //			});	
 			
 		findByFilterSelection
-			.getOptionalUserEntity(searchFilterValue)
+			.getOptionalUserEntity(searchFilterValue,searchFilterType)
 			.map(
 					user->{//void 
 						Optional.of(userDTO.getNameDTO())
