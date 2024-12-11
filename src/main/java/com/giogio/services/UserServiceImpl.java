@@ -1,8 +1,10 @@
 package com.giogio.services;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.SortedMap;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	@Override
-	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException { 
+	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException {
 	
 		return 
 				findByFilterSelection
@@ -107,7 +109,7 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional 
 	@Override
-	public List<UserEntity> getAllUsers() throws NotFoundException {
+	public List<UserDTO> getAllUsers() throws NotFoundException {
 		
 		return 
 				userRepository
@@ -116,7 +118,7 @@ public class UserServiceImpl implements UserService {
 						.map(
 								(user)->{
 									notificationSender.notifyMessage("user "+user.getEmail()+" retrived");
-									return user;
+									return fromUserEntityToUserDTO.doMapping(user);
 								}
 						)
 						.toList();

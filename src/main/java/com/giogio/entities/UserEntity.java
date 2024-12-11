@@ -33,7 +33,7 @@ public class UserEntity {
 	@NotNull
 	@NotEmpty
 	private String surname;
-	@Min(18)
+//	@Min(10)
 	private Integer age;
 	@NotNull
 	@NotEmpty

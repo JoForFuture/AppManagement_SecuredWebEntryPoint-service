@@ -15,7 +15,7 @@ public interface UserService {
 	
 	UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException;
 
-	List<UserEntity> getAllUsers() throws NotFoundException;
+	List<UserDTO> getAllUsers() throws NotFoundException;
 
 	void updateUserRecordByDto(UserDTO userDTO ,Object filter,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException;
 	

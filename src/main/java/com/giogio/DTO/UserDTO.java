@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserDTO implements UserDTO_FI<UserDTO>{
+public class UserDTO implements UserDTO_FI<UserDTO>, Comparable<UserDTO>{
 	
 	private String nameDTO;
 	private String surnameDTO;
@@ -21,5 +21,10 @@ public class UserDTO implements UserDTO_FI<UserDTO>{
 	public UserDTO myStream() {
 		// TODO Auto-generated method stub
 		return this;
+	}
+
+	@Override
+	public int compareTo(UserDTO o) {
+		return surnameDTO.compareTo(o.getSurnameDTO());
 	}
 }
