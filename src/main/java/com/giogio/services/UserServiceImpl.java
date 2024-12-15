@@ -2,7 +2,6 @@ package com.giogio.services;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -83,7 +82,12 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	@Override
-	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException {
+	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
+	{	
+		if(filter==null||searchFilterType==null) {
+			throw new IllegalArgumentException("at least one argument is null");
+
+		}
 	
 		return 
 				findByFilterSelection
@@ -126,67 +130,30 @@ public class UserServiceImpl implements UserService {
 
 	//--------------------------UPDATE --------------------------
 	
+	
 	@Transactional
 	@Override
-	public void updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException {
-	
-//		FIGOOOOO
-//		userDTO
-//			.nameNotNullAndNotEmpty("StingaProva", (s)->{
-//				return userDTO;
-//			});	
-			
-		findByFilterSelection
-			.getOptionalUserEntity(searchFilterValue,searchFilterType)
-			.map(
-					user->{//void 
-						Optional.of(userDTO.getNameDTO())
-									.filter(u->userDTO.getNameDTO() != null && !userDTO.getNameDTO().isBlank())
-									.ifPresentOrElse(
-												value->user.setName(value),
-											()->{
-												System.out.println("value not modified");
-											});
-						
-						Optional.of(userDTO.getSurnameDTO())
-						.filter(u->userDTO.getSurnameDTO() != null && !userDTO.getSurnameDTO().isBlank())
-						.ifPresentOrElse(
-									value->user.setSurname(value),
-								()->{
-									System.out.println("value not modified");
-								});
-						
-						Optional.of(userDTO.getAgeDTO())
-						.filter(u->userDTO.getAgeDTO() != null)
-						.ifPresentOrElse(
-									value->user.setAge(value),
-								()->{
-									System.out.println("value not modified");
-								});
-					
-						
-						return user;
-						}
-					) .ifPresentOrElse(
-							 (user)->{
-									userRepository.save(user);
-									notificationSender.notifyMessage("user : "+user+" update successfully");
-								 }
-							 ,
-							 ()->{
-									notificationSender.notifyMessage("user : "+String.valueOf(searchFilterValue) +" update failed");
+	public Long updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException {
+		
+		return findByFilterSelection
+					.getOptionalUserEntity(searchFilterValue,searchFilterType)
+					.map(userEntity->userEntity
+											.setNameFromNotNullAndNotBlank(userDTO)
+											.setSurnameFromNotNullAndNotBlank(userDTO)
+											.setAgeFromNotNullAndNotZero(userDTO)
+											.setEmailFromNotNullAndNotBlank(userDTO))
+					.map(userRepository::save)
+					.map(userEntity->{
+									notificationSender.notifyMessage("user : "+userEntity+" update successfully");
+									return userEntity.getId(); })
+					.orElseGet(()->{
+						notificationSender.notifyMessage("user : "+String.valueOf(searchFilterValue) +" update failed");
+						return -1l;
 
-								 }
-							 );
-			
+					 });
 	}
-	
+					
 
-	
-
-	
-	
-	
 
 	
 	//--------------------------DELETE--------------------------

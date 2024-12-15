@@ -209,9 +209,38 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void getAllUsers() throws NotFoundException {
+	void getUserByFilter_nullArguments() {
 		
-		List<UserEntity> userEntityListFunctional=
+		final SearchFilterType searchFilterType=SearchFilterType.EMAIL;
+		
+		final String filter=null;
+		
+		IllegalArgumentException iae=assertThrows(IllegalArgumentException.class,
+				()->userServiceImpl.getUserByFilter(filter, searchFilterType));
+		
+		assertEquals(iae.getMessage(),"at least one argument is null");
+		
+		
+		final SearchFilterType searchFilterType01=null;
+		
+		final String filter01="newEmail01@email.com";
+		
+		iae=assertThrows(IllegalArgumentException.class,
+				()->userServiceImpl.getUserByFilter(filter01, searchFilterType01));
+		
+		assertEquals(iae.getMessage(),"at least one argument is null");
+
+		
+		
+
+	}
+	
+	
+	
+	@Test
+	void getAllUsers(){
+		
+		List<UserEntity> userEntityList=
 				IntStream.range(1, 1001)
 						 .mapToObj(i->
 						 	new UserEntity(Integer.toUnsignedLong(i),
@@ -222,22 +251,76 @@ public class UserServiceImplTest {
 						 .collect(Collectors.toList());
 		
 		List<UserDTO> userDTOListResponse=
-				userEntityListFunctional.stream()
+				userEntityList.stream()
 									.map(user-> fromUserEntityToUserDTO.doMapping(user))
 									.toList();
 				
-		when(userRepository.findAll()).thenReturn(userEntityListFunctional);
+		when(userRepository.findAll()).thenReturn(userEntityList);
 		
-		List<UserDTO> userDTOListResponseFromDB=userServiceImpl.getAllUsers();
-		
-		assertEquals(userDTOListResponse,userDTOListResponseFromDB);
-		
-		
+		List<UserDTO> userDTOListResponseFromDB;
+		try {
+			userDTOListResponseFromDB = userServiceImpl.getAllUsers();
+			assertEquals(userDTOListResponse,userDTOListResponseFromDB);
 
-		
+		} catch (NotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 	}
+	
+	@Test
+	void updateUserRecordByDto() {
+		
+		final UserDTO userDTO=UserDTO.builder()
+				.surnameDTO("NewSurname01")
+				.nameDTO("NewName01")
+				.ageDTO(44)
+				.emailDTO("Email01@email.com")
+				.build();
+
+		final UserEntity inMemoryUser=UserEntity.builder()
+				.surname("OldSurname01")
+				.name("OldName01")
+				.age(33)
+				.email("Email01@email.com")
+				.id(3l)
+				.build();
+		
+		final UserEntity inMemoryUserUpdated=UserEntity.builder()
+				.surname("NewSurname01")
+				.name("NewName01")
+				.age(44)
+				.email("Email01@email.com")
+				.id(3l)
+				.build();
+	
+		
+		final String filter="Email01@email.com";
+		
+		when(findByFilterSelection.getOptionalUserEntity(filter,SearchFilterType.EMAIL )).thenReturn(Optional.of(inMemoryUser));
+		
+		when(userRepository.save(inMemoryUserUpdated)).thenReturn(inMemoryUserUpdated);
+				
+		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTO, filter, SearchFilterType.EMAIL);
+				
+		when(findByFilterSelection.getOptionalUserEntity(userUpdatedId,SearchFilterType.ID)).thenReturn(Optional.of(inMemoryUserUpdated));
+
+		when(fromUserEntityToUserDTO.doMapping(inMemoryUserUpdated)).thenReturn(userDTO);
+		
+		UserDTO userRetrived=userServiceImpl.getUserByFilter(userUpdatedId, SearchFilterType.ID);
+		
+		assertEquals(userRetrived.getSurnameDTO(),userDTO.getSurnameDTO());
+		assertEquals(userRetrived.getNameDTO(),userDTO.getNameDTO());
+		assertEquals(userRetrived.getAgeDTO(),userDTO.getAgeDTO());
+		assertEquals(userRetrived.getEmailDTO(),userDTO.getEmailDTO());
+
+	
+		
+	}
+	
+	
 
 
 }

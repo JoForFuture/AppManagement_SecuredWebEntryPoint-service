@@ -43,7 +43,7 @@ public class UserController {
 		.stream()
 		.forEach(userService::addUserIfNotPresent);
 		
-		return new ResponseEntity<Long>(5l, HttpStatus.OK);
+		return new ResponseEntity<Long>(1l, HttpStatus.OK);
 	}
 	
 	@GetMapping("/getAll")
