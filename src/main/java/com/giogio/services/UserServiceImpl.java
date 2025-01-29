@@ -65,10 +65,12 @@ public class UserServiceImpl implements UserService {
 		if(userDTO==null||userDTO.getEmailDTO()==null||userDTO.getEmailDTO().isBlank()) {
 			throw new IllegalArgumentException("at least one argument is null");
 		}
-		return userRepository
+		 return userRepository
 					.findUserEntityByEmail(userDTO.getEmailDTO())
 					.map((user)->{
-						notificationSender.notifyMessage("user with name: \" "+user.getName()+" \" already exist");
+						String message="user with name: \" "+user.getName()+" \" already exist";
+						notificationSender.notifyMessage(message);
+						throwMyRuntimeException(message);
 						return -1l;
 						})
 					.orElseGet(()->{
@@ -76,6 +78,10 @@ public class UserServiceImpl implements UserService {
 						notificationSender.notifyMessage("user with name: \" "+ savedUser +" \" saved");
 						return savedUser.getId();
 					});		 
+	}
+	
+	private void throwMyRuntimeException(String message) {
+		throw new RuntimeException(message);
 	}
 	
 
@@ -111,6 +117,9 @@ public class UserServiceImpl implements UserService {
 		catch(NoSuchElementException nsee) { }
 		catch(IllegalArgumentException nsee) {};
 		
+		if(foundUsers.isEmpty()) {
+			throw new NoSuchElementException("not found");
+		}
 		return foundUsers;
 	}
 	
@@ -222,14 +231,14 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional
 	@Override
-	public Long deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException{
+	public Long deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException, RuntimeException{
 		if(	userRepository.existsById(id)) {
 			userRepository.deleteById(id);
 			notificationSender.notifyMessage("user deleted");
 			return id;
 			}else {
 				notificationSender.notifyMessage("user delete failed. User not found");
-				return -1l;
+				throw new RuntimeException("user delete failed. User not found");
 			}
 		}
 
