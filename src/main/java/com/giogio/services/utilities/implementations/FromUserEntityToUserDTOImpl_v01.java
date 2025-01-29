@@ -17,6 +17,7 @@ public class FromUserEntityToUserDTOImpl_v01 implements FromUserEntityToUserDTO{
 		}
 		
 		return UserDTO.builder()
+					.idDTO(userEntity.getId()==null?0 : userEntity.getId())
 					.surnameDTO(userEntity.getSurname()==null ? "" : userEntity.getSurname())
 					.nameDTO(userEntity.getName()==null ? "" : userEntity.getName())
 					.ageDTO(userEntity.getAge()==null ? 0 : userEntity.getAge())

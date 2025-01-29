@@ -1,5 +1,6 @@
 package com.giogio.services;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -58,8 +59,8 @@ public class UserServiceImpl implements UserService {
  * 			 will create new user with information issued and send confirm notification.
  */
 	@Transactional
-	@Override
-	public Long addUserIfNotPresent( UserDTO userDTO) throws IllegalArgumentException{
+	@Override 
+	public Long addUserIfNotPresent( UserDTO userDTO) throws IllegalArgumentException, RuntimeException{
 		
 		if(userDTO==null||userDTO.getEmailDTO()==null||userDTO.getEmailDTO().isBlank()) {
 			throw new IllegalArgumentException("at least one argument is null");
@@ -80,15 +81,49 @@ public class UserServiceImpl implements UserService {
 
 	//--------------------------READ--------------------------
 	
+	
+	@Override
+	public List<UserDTO> getUsersByDTO(UserDTO userDTO) throws NoSuchElementException {
+		
+		List<UserDTO> foundUsers=new LinkedList<>();
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getIdDTO(), SearchFilterType.ID));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getEmailDTO(), SearchFilterType.EMAIL));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getNameDTO(), SearchFilterType.NAME));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getSurnameDTO(), SearchFilterType.SURNAME));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getAgeDTO(), SearchFilterType.AGE));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getNameSurnameDTO(), SearchFilterType.NAME_SURNAME));}
+		catch(NoSuchElementException nsee) { }
+		catch(IllegalArgumentException nsee) {};
+		
+		return foundUsers;
+	}
+	
 	@Transactional
 	@Override
-	public UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
+	public UserDTO getSingleUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
 	{	
 		if(filter==null||searchFilterType==null) {
 			throw new IllegalArgumentException("at least one argument is null");
 
 		}
 	
+		
 		return 
 				findByFilterSelection
 						.getOptionalUserEntity(filter,searchFilterType)
@@ -107,7 +142,34 @@ public class UserServiceImpl implements UserService {
 	
 	
 	
+	@Transactional
+	@Override
+	public List<UserDTO> getUsersByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
+	{	
+		if(filter==null||searchFilterType==null) {
+			throw new IllegalArgumentException("at least one argument is null");
+
+		}
 	
+		
+		return findByFilterSelection
+				.getUserEntityList(filter, searchFilterType)
+				.stream()
+				.map(user->{
+					notificationSender.notifyMessage("user "+user+" "
+							+ "found");
+					return fromUserEntityToUserDTO.doMapping(user);
+				}).toList();
+				
+		
+						
+//				.orElseThrow(
+//						() -> {
+//							notificationSender.notifyMessage("User not found");
+//							return new NoSuchElementException("User not found");
+//			    });
+		
+	}
 	
 	@Transactional 
 	@Override
@@ -160,16 +222,19 @@ public class UserServiceImpl implements UserService {
 
 	@Transactional
 	@Override
-	public boolean deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException{
+	public Long deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException{
 		if(	userRepository.existsById(id)) {
 			userRepository.deleteById(id);
 			notificationSender.notifyMessage("user deleted");
-			return true;
+			return id;
 			}else {
 				notificationSender.notifyMessage("user delete failed. User not found");
-				throw new NoSuchElementException();
+				return -1l;
 			}
 		}
+
+
+	
 		
 
 		

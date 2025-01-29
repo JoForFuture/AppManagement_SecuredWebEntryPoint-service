@@ -8,9 +8,10 @@ import com.giogio.DTO.UserDTO;
 import com.giogio.entities.UserEntity;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
 
-@Qualifier("fromUserDTOToUserEntity_v02")
+@Primary
+@Qualifier("fromUserDTOToUserEntity_v03")
 @Component
-public class FromUserDTOToUserEntity_v02 implements FromUserDTOToUserEntity{
+public class FromUserDTOToUserEntity_v03 implements FromUserDTOToUserEntity{
 
 
 	@Override
@@ -19,6 +20,7 @@ public class FromUserDTOToUserEntity_v02 implements FromUserDTOToUserEntity{
 			throw new IllegalArgumentException("at least one argument is null");
 		}
 		return UserEntity.builder()
+						.id(userDTO.getIdDTO())
 						.name(userDTO.getNameDTO()==null ? "" : userDTO.getNameDTO())
 						.surname(userDTO.getSurnameDTO()==null ? "" : userDTO.getSurnameDTO())
 						.age(userDTO.getAgeDTO()==null ? 0 : userDTO.getAgeDTO())

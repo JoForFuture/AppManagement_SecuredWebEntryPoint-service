@@ -13,13 +13,19 @@ public interface UserService {
 		
 	Long addUserIfNotPresent(UserDTO userDTO)throws IllegalArgumentException;
 	
-	UserDTO getUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException;
+	List<UserDTO> getUsersByDTO(UserDTO userDTO) throws NoSuchElementException;
+	
+	UserDTO getSingleUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException;
+	
+	List<UserDTO> getUsersByFilter(Object filter, SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException;
 
 	List<UserDTO> getAllUsers() throws NotFoundException;
 	
 	Long updateUserRecordByDto(UserDTO userDTO ,Object filter,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException;
 
-	boolean deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException;
+	Long deleteUserById(Long id) throws IllegalArgumentException, NoSuchElementException;
+
+	
 
 
 	

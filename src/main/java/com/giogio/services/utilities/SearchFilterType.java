@@ -7,7 +7,8 @@ public enum SearchFilterType {
 	EMAIL,
 	SURNAME,
 	NAME,
-	AGE
+	AGE,
+	NAME_SURNAME
 	
 
 }

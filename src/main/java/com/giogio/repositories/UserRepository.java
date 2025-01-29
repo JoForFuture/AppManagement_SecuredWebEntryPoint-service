@@ -12,12 +12,16 @@ import com.giogio.entities.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity,Long> {
 	
 	Optional<UserEntity> findUserEntityById(Long id);
-
-//	Optional<UserEntity> findByNameIgnoreCase(String nameDTO);
 	
-	Optional<UserEntity> findUserEntityByNameAndSurnameIgnoreCase(String nameDTO, String surname);
+	Optional<List<UserEntity>> findUserEntityByNameAndSurnameIgnoreCase(String nameDTO, String surname);
 	
 	Optional<UserEntity> findUserEntityByEmail(String email);
+
+	Optional<List<UserEntity>> findUserEntityByAge(Integer filter);
+
+	Optional<List<UserEntity>> findUserEntityByName(String filter);
+
+	Optional<List<UserEntity>> findUserEntityBySurname(String filter);
 
 
 	

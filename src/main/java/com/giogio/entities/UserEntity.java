@@ -75,11 +75,11 @@ public class UserEntity {
 		if(userDTO.getSurnameDTO()!=null && !(userDTO.getSurnameDTO().isBlank())) {
 			
 			this.surname=userDTO.getSurnameDTO();
-			System.out.println("surname updated");
+			System.out.println("surname: updated");
 
 	
 		}else {
-			System.out.println("surname-value not modified");
+			System.out.println("surname: value not modified");
 		}
 		return this;
 
@@ -91,11 +91,11 @@ public class UserEntity {
 		if(userDTO.getNameDTO()!=null && !(userDTO.getNameDTO().isBlank())) {
 			
 			this.name=userDTO.getNameDTO();
-			System.out.println("name updated");
+			System.out.println("name: updated");
 
 	
 		}else {
-			System.out.println("name-value not modified");
+			System.out.println("name: value not modified");
 		}
 		return this;
 
@@ -106,11 +106,11 @@ public class UserEntity {
 		if(userDTO.getAgeDTO()!=null && (userDTO.getAgeDTO()!=0)) {
 			
 			this.age=userDTO.getAgeDTO();
-			System.out.println("age updated");
+			System.out.println("age: updated");
 
 	
 		}else {
-			System.out.println("age-value not modified");
+			System.out.println("age: value not modified");
 		}
 		return this;
 	}
@@ -120,11 +120,11 @@ public class UserEntity {
 		if(userDTO.getEmailDTO()!=null && !(userDTO.getEmailDTO().isBlank())) {
 			
 			this.email=userDTO.getEmailDTO();
-			System.out.println("email updated");
+			System.out.println("email: updated");
 
 	
 		}else {
-			System.out.println("email-value not modified");
+			System.out.println("email: value not modified");
 		}
 		return this;
 
