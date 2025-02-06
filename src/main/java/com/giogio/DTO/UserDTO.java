@@ -2,6 +2,8 @@ package com.giogio.DTO;
 
 import java.util.Set;
 
+import com.giogio.services.utilities.UserDTOUtilities;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Email;
@@ -16,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserDTO implements Comparable<UserDTO>{
+public class UserDTO implements UserDTOUtilities, Comparable<UserDTO>{
 	
 	private Long idDTO;
 	
@@ -46,5 +48,10 @@ public class UserDTO implements Comparable<UserDTO>{
 	@Override
 	public int compareTo(UserDTO o) {
 		return surnameDTO.compareTo(o.getSurnameDTO());
+	}
+	
+	public UserDTO and() {
+		return this;
+		
 	}
 }

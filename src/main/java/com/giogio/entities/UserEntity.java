@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 @Getter
@@ -72,7 +71,7 @@ public class UserEntity {
 	}
 	public UserEntity setSurnameFromNotNullAndNotBlank( UserDTO userDTO) {
 		
-		if(userDTO.getSurnameDTO()!=null && !(userDTO.getSurnameDTO().isBlank())) {
+		if(userDTO.getSurnameDTO()!=null && !(userDTO.getSurnameDTO().isBlank())&& !(this.surname.equals(userDTO.getSurnameDTO()))) {
 			
 			this.surname=userDTO.getSurnameDTO();
 			System.out.println("surname: updated");
@@ -88,7 +87,7 @@ public class UserEntity {
 
 	public UserEntity setNameFromNotNullAndNotBlank (UserDTO userDTO) {
 				
-		if(userDTO.getNameDTO()!=null && !(userDTO.getNameDTO().isBlank())) {
+		if(userDTO.getNameDTO()!=null && !(userDTO.getNameDTO().isBlank())&& !(this.name.equals(userDTO.getNameDTO()))) {
 			
 			this.name=userDTO.getNameDTO();
 			System.out.println("name: updated");
@@ -103,7 +102,7 @@ public class UserEntity {
 	
 	public UserEntity setAgeFromNotNullAndNotZero( UserDTO userDTO) {
 		
-		if(userDTO.getAgeDTO()!=null && (userDTO.getAgeDTO()!=0)) {
+		if(userDTO.getAgeDTO()!=null && (userDTO.getAgeDTO()!=0)&&this.age!=userDTO.getAgeDTO()) {
 			
 			this.age=userDTO.getAgeDTO();
 			System.out.println("age: updated");
@@ -117,7 +116,7 @@ public class UserEntity {
 	
 	public UserEntity setEmailFromNotNullAndNotBlank (UserDTO userDTO) {
 		
-		if(userDTO.getEmailDTO()!=null && !(userDTO.getEmailDTO().isBlank())) {
+		if(userDTO.getEmailDTO()!=null && !(userDTO.getEmailDTO().isBlank())&& !(this.email.equals(userDTO.getEmailDTO()))) {
 			
 			this.email=userDTO.getEmailDTO();
 			System.out.println("email: updated");

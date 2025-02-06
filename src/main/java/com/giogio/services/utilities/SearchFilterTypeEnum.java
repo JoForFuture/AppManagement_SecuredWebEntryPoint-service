@@ -1,7 +1,7 @@
 package com.giogio.services.utilities;
 
 
-public enum SearchFilterType {
+public enum SearchFilterTypeEnum {
 	
 	ID,
 	EMAIL,

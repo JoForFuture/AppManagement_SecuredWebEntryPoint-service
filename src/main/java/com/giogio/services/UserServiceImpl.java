@@ -1,8 +1,10 @@
 package com.giogio.services;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,8 @@ import com.giogio.services.utilities.FindByFilterSelection;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
 import com.giogio.services.utilities.FromUserEntityToUserDTO;
 import com.giogio.services.utilities.NotificationSender;
-import com.giogio.services.utilities.SearchFilterType;
+import com.giogio.services.utilities.SearchFilterTypeEnum;
+
 
 @Validated
 @Service
@@ -28,7 +31,7 @@ public class UserServiceImpl implements UserService {
 	private FromUserEntityToUserDTO fromUserEntityToUserDTO;
 	private NotificationSender notificationSender;
 	private FindByFilterSelection findByFilterSelection;
-	
+	 
 	
 	//-------------------------- Constructor--------------------------
 	public UserServiceImpl(
@@ -89,71 +92,121 @@ public class UserServiceImpl implements UserService {
 	
 	
 	@Override
-	public List<UserDTO> getUsersByDTO(UserDTO userDTO) throws NoSuchElementException {
+	public List<UserDTO> getUsersByDTOFields(UserDTO userDTO) throws NoSuchElementException {
 		
-		List<UserDTO> foundUsers=new LinkedList<>();
 		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getIdDTO(), SearchFilterType.ID));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
 		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getEmailDTO(), SearchFilterType.EMAIL));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
-		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getNameDTO(), SearchFilterType.NAME));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
-		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getSurnameDTO(), SearchFilterType.SURNAME));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
-		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getAgeDTO(), SearchFilterType.AGE));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
-		
-		try {foundUsers.addAll(this.getUsersByFilter(userDTO.getNameSurnameDTO(), SearchFilterType.NAME_SURNAME));}
-		catch(NoSuchElementException nsee) { }
-		catch(IllegalArgumentException nsee) {};
-		
-		if(foundUsers.isEmpty()) {
+		Predicate<UserDTO> lambdaFilter_IfNameNotNull = u ->	userDTO.getNameDTO() == null ||
+														u.getNameDTO().equals(userDTO.getNameDTO());
+			
+		Predicate<UserDTO> lambdaFilter_IfAgeNotNullOrNotZero=u-> userDTO.getAgeDTO()==null ||
+																 userDTO.getAgeDTO()==0	||
+																 u.getAgeDTO().equals(userDTO.getAgeDTO());
+
+		if(userDTO.getIdDTO()!=null&&userDTO.getIdDTO()!=0) {
+			return 
+					List.of( this.getUserById(userDTO.getIdDTO()) );	
+		}else if(userDTO.getEmailDTO()!=null&&!userDTO.getEmailDTO().isBlank()) {
+			return 
+					List.of( this.getUserByEmail(userDTO.getEmailDTO()) );
+		}else if(userDTO.getSurnameDTO()!=null&&!userDTO.getSurnameDTO().isBlank()) { 
+			return 
+					this.getUsersBySurname(userDTO.getSurnameDTO())
+									.stream()
+									.filter(lambdaFilter_IfNameNotNull)
+									.filter(lambdaFilter_IfAgeNotNullOrNotZero)
+									.toList();
+		}else if(userDTO.getNameDTO()!=null&&!userDTO.getNameDTO().isBlank()) {
+			return
+					this.getUsersByName(userDTO.getNameDTO())
+								.stream()
+								.filter(lambdaFilter_IfAgeNotNullOrNotZero)
+								.toList();
+		}else if(userDTO.getAgeDTO()!=null && userDTO.getAgeDTO()!=0) {
+			return 
+					this.getUsersByAge(userDTO.getAgeDTO());
+		}else if(userDTO.getNameSurnameDTO()!=null&&!userDTO.getNameSurnameDTO().isBlank()) {
+			return 
+					this.getUsersByNameAndSurname(userDTO.getNameSurnameDTO());
+		}else {
 			throw new NoSuchElementException("not found");
 		}
-		return foundUsers;
+		
+//		userDTO.getUserByNameSurname(foundUsers, userDTO, this);
+		
+	
 	}
 	
-	@Transactional
-	@Override
-	public UserDTO getSingleUserByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
-	{	
-		if(filter==null||searchFilterType==null) {
-			throw new IllegalArgumentException("at least one argument is null");
-
-		}
 	
+
+
+	@Override
+	public UserDTO getUserById(Long idDTO) throws NoSuchElementException{
+		return 
+				this.fromUserEntityToUserDTO.doMapping(userRepository.findById(idDTO)
+																		 .orElseThrow());
+	}
+	
+	@Override
+	public UserDTO getUserByEmail(String emailDTO) throws NoSuchElementException{
+		return 
+				this.fromUserEntityToUserDTO.doMapping(userRepository.findUserEntityByEmail(emailDTO)
+																		.orElseThrow());
+	}
+	
+	@Override
+	public List<UserDTO> getUsersByName(String nameDTO) throws NoSuchElementException{
+		return 
+				userRepository.findUserEntitiesByName(nameDTO)
+								.orElseThrow()
+								.stream()
+								.map(userEntity->fromUserEntityToUserDTO.doMapping(userEntity))
+								.toList();
+
+	}
+	
+	@Override
+	public List<UserDTO> getUsersBySurname(String surnameDTO) throws NoSuchElementException {
+		return 
+				userRepository.findUserEntitiesBySurname(surnameDTO)
+								.orElseThrow()
+								.stream()
+								.map(userEntity->fromUserEntityToUserDTO.doMapping(userEntity))
+								.toList();
+
+	}
+	
+	
+	@Override
+	public List<UserDTO> getUsersByAge(Integer ageDTO) throws NoSuchElementException{
+		return 
+				userRepository.findUserEntitiesByAge(ageDTO)
+								.orElseThrow()
+								.stream()
+								.map(userEntity->fromUserEntityToUserDTO.doMapping(userEntity))
+								.toList();
+		
+	}
+	
+	@Override
+	public List<UserDTO> getUsersByNameAndSurname(String nameAndSurnameDTO) throws NoSuchElementException{
+		String[] nameSurnameArray=nameAndSurnameDTO.split("_");
 		
 		return 
-				findByFilterSelection
-						.getOptionalUserEntity(filter,searchFilterType)
-						.map(
-								(user)->{
-									notificationSender.notifyMessage("user found");
-									return fromUserEntityToUserDTO.doMapping(user);
-									}
-								)
-						.orElseThrow(
-								() -> {
-									notificationSender.notifyMessage("User not found");
-									return new NoSuchElementException("User not found");
-					    });
+				userRepository.findUserEntitiesByNameAndSurnameIgnoreCase(nameSurnameArray[0],nameSurnameArray[1])
+								.orElseThrow()
+								.stream()
+								.map(userEntity->fromUserEntityToUserDTO.doMapping(userEntity))
+								.toList();
+
 	}
+
+
 	
-	
-	
-	@Transactional
+
+	@Deprecated
 	@Override
-	public List<UserDTO> getUsersByFilter(Object filter,SearchFilterType searchFilterType) throws NoSuchElementException, IllegalArgumentException
+	public List<UserDTO> getUsersByFilter(Object filter,SearchFilterTypeEnum searchFilterType) throws NoSuchElementException, IllegalArgumentException
 	{	
 		if(filter==null||searchFilterType==null) {
 			throw new IllegalArgumentException("at least one argument is null");
@@ -180,6 +233,34 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
+	
+	@Deprecated
+	@Override
+	public UserDTO getSingleUserByFilter(Object filter,SearchFilterTypeEnum searchFilterType) throws NoSuchElementException, IllegalArgumentException
+	{	
+		if(filter==null||searchFilterType==null) {
+			throw new IllegalArgumentException("at least one argument is null");
+
+		}
+	
+		
+		return 
+				findByFilterSelection
+						.getOptionalUserEntity(filter,searchFilterType)
+						.map(
+								(user)->{
+									notificationSender.notifyMessage("user found");
+									return fromUserEntityToUserDTO.doMapping(user);
+									}
+								)
+						.orElseThrow(
+								() -> {
+									notificationSender.notifyMessage("User not found");
+									return new NoSuchElementException("User not found");
+					    });
+	}
+	
+	
 	@Transactional 
 	@Override
 	public List<UserDTO> getAllUsers() throws NotFoundException {
@@ -204,10 +285,10 @@ public class UserServiceImpl implements UserService {
 	
 	@Transactional
 	@Override
-	public Long updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue,SearchFilterType searchFilterType) throws IllegalArgumentException, NoSuchElementException {
+	public Long updateUserRecordByDto(UserDTO userDTO , Object searchFilterValue,SearchFilterTypeEnum searchFilterTypeEnum) throws IllegalArgumentException, NoSuchElementException {
 		
 		return findByFilterSelection
-					.getOptionalUserEntity(searchFilterValue,searchFilterType)
+					.getOptionalUserEntity(searchFilterValue,searchFilterTypeEnum)
 					.map(userEntity->userEntity
 											.setNameFromNotNullAndNotBlank(userDTO)
 											.setSurnameFromNotNullAndNotBlank(userDTO)
@@ -217,11 +298,14 @@ public class UserServiceImpl implements UserService {
 					.map(userEntity->{
 									notificationSender.notifyMessage("user : "+userEntity+" update successfully");
 									return userEntity.getId(); })
-					.orElseGet(()->{
+					.orElseThrow(()->{
 						notificationSender.notifyMessage("user : "+String.valueOf(searchFilterValue) +" update failed");
-						return -1l;
-
-					 });
+						throw new RuntimeException("user : "+String.valueOf(searchFilterValue) +" update failed");
+					});
+//					.orElseGet(()->{
+//						return -1l;
+//
+//					 });
 	}
 					
 

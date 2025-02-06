@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import com.giogio.entities.UserEntity;
 import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
-import com.giogio.services.utilities.SearchFilterType;
+import com.giogio.services.utilities.SearchFilterTypeEnum;
 
 @SpringBootTest
 public class FindByFilterSelectionImpl_v01Test {
@@ -41,7 +41,7 @@ public class FindByFilterSelectionImpl_v01Test {
 		
 		final String emailFilter="user01@email.com";
 		
-		final SearchFilterType searchFilterTypeEMAIL=SearchFilterType.EMAIL;
+		final SearchFilterTypeEnum searchFilterTypeEMAIL=SearchFilterTypeEnum.EMAIL;
 		
 		when(userRepository.findUserEntityByEmail(emailFilter)).thenReturn(user);
 				
@@ -52,9 +52,9 @@ public class FindByFilterSelectionImpl_v01Test {
 		
 		final Long idFilter=4l;
 	
-		final SearchFilterType searchFilterTypeID=SearchFilterType.ID;
+		final SearchFilterTypeEnum searchFilterTypeID=SearchFilterTypeEnum.ID;
 	
-		when(userRepository.findUserEntityById(idFilter)).thenReturn(user);
+		when(userRepository.findById(idFilter)).thenReturn(user);
 			
 		Optional<UserEntity> userFromDBByID=findByFilterSelectionImpl_v01.getOptionalUserEntity(idFilter, searchFilterTypeID);
 		

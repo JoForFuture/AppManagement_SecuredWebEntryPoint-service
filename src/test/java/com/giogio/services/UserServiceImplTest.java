@@ -26,7 +26,7 @@ import com.giogio.services.utilities.FindByFilterSelection;
 import com.giogio.services.utilities.FromUserDTOToUserEntity;
 import com.giogio.services.utilities.FromUserEntityToUserDTO;
 import com.giogio.services.utilities.NotificationSender;
-import com.giogio.services.utilities.SearchFilterType;
+import com.giogio.services.utilities.SearchFilterTypeEnum;
 
 @SpringBootTest
 public class UserServiceImplTest {
@@ -42,46 +42,52 @@ public class UserServiceImplTest {
 	@Mock
 	private FindByFilterSelection findByFilterSelection;
 	
+//	@Mock
 	@InjectMocks
 	private UserServiceImpl userServiceImpl;
 	
+	
+	final UserDTO userDTO=UserDTO.builder()
+			.surnameDTO("NewSurname01")
+			.nameDTO("NewName01")
+			.ageDTO(33)
+			.emailDTO("newEmail01@email.com")
+			.build();
+	
+	
+	final UserEntity userToSave=UserEntity.builder()
+			.surname("NewSurname01")
+			.name("NewName01")
+			.age(33)
+			.email("newEmail01@email.com")
+			.build();
+	
+	final UserEntity inMemoryUser=UserEntity.builder()
+			.surname("NewSurname01")
+			.name("NewName01")
+			.age(33)
+			.email("newEmail01@email.com")
+			.id(3l)
+			.build();
+	
+	
+//	°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°CREATE °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+	
 	@Test
 	void addUserIfNotPresentTest_effectiveNewUser() {
-		
-		final UserDTO userDTO=UserDTO.builder()
-								.surnameDTO("NewSurname01")
-								.nameDTO("NewName01")
-								.ageDTO(33)
-								.emailDTO("newEmail01@email.com")
-								.build();
-				
-		final UserEntity userToSave=UserEntity.builder()
-				.surname("NewSurname01")
-				.name("NewName01")
-				.age(33)
-				.email("newEmail01@email.com")
-				.build();
-		
-		final UserEntity savedUser=UserEntity.builder()
-				.surname("NewSurname01")
-				.name("NewName01")
-				.age(33)
-				.email("newEmail01@email.com")
-				.id(3l)
-				.build();
 		
 		
 		 Optional<UserEntity> notFoundUser=Optional.empty();
 		
 		when(userRepository.findUserEntityByEmail(userDTO.getEmailDTO())).thenReturn(notFoundUser);
 		
-		when(userRepository.save(userToSave)).thenReturn(savedUser);
+		when(userRepository.save(userToSave)).thenReturn(inMemoryUser);
 		
 		when(fromUserDTOToUserEntity.doMapping(userDTO)).thenReturn(userToSave);
 		
 		Long idSavedUser=userServiceImpl.addUserIfNotPresent(userDTO);
 		
-		verify(notificationSender,times(1)).notifyMessage("user with name: \" "+ savedUser +" \" saved");
+		verify(notificationSender,times(1)).notifyMessage("user with name: \" "+ inMemoryUser +" \" saved");
 		
 		verify(userRepository,times(1)).findUserEntityByEmail(userDTO.getEmailDTO());
 		
@@ -89,16 +95,16 @@ public class UserServiceImplTest {
 		
 		verify(fromUserDTOToUserEntity,times(1)).doMapping(userDTO);
 
-		assertEquals(userToSave.getSurname(),savedUser.getSurname());
+		assertEquals(userToSave.getSurname(),inMemoryUser.getSurname());
 		
-		assertEquals(userToSave.getName(),savedUser.getName());
+		assertEquals(userToSave.getName(),inMemoryUser.getName());
 		
-		assertEquals(userToSave.getAge(),savedUser.getAge());
+		assertEquals(userToSave.getAge(),inMemoryUser.getAge());
 		
-		assertEquals(userToSave.getEmail(),savedUser.getEmail());
+		assertEquals(userToSave.getEmail(),inMemoryUser.getEmail());
 
 
-		assertEquals(idSavedUser,savedUser.getId());
+		assertEquals(idSavedUser,inMemoryUser.getId());
 		
 		
 	}
@@ -106,32 +112,24 @@ public class UserServiceImplTest {
 	@Test
 	void addUserIfNotPresentTest_whenUserAlreadyExist() {
 		
-		final UserDTO userDTO=UserDTO.builder()
-				.surnameDTO("NewSurname01")
-				.nameDTO("NewName01")
-				.ageDTO(33)
-				.emailDTO("newEmail01@email.com")
-				.build();
-
-		final UserEntity savedUser=UserEntity.builder()
-				.surname("NewSurname01")
-				.name("NewName01")
-				.age(33)
-				.email("newEmail01@email.com")
-				.id(3l)
-				.build();
 		
-		Optional<UserEntity> foundUser=Optional.of(savedUser);
+		Optional<UserEntity> foundUser=Optional.of(inMemoryUser);
 			
 		when(userRepository.findUserEntityByEmail(userDTO.getEmailDTO())).thenReturn(foundUser);
 			
-		Long idSavedUser=userServiceImpl.addUserIfNotPresent(userDTO);
-			
-		verify(notificationSender,times(1)).notifyMessage("user with name: \" "+savedUser.getName()+" \" already exist");
-			
+		RuntimeException re=assertThrows(RuntimeException.class,
+										 ()->userServiceImpl.addUserIfNotPresent(userDTO));
+		
 		verify(userRepository,times(1)).findUserEntityByEmail(userDTO.getEmailDTO());
-			
-		assertEquals(idSavedUser,-1l);
+		
+		verify(notificationSender,times(1)).notifyMessage("user with name: \" "+inMemoryUser.getName()+" \" already exist");
+
+
+		String message="user with name: \" "+userDTO.getNameDTO()+" \" already exist";
+		
+		assertEquals(message,re.getMessage());
+		
+
 	}
 	
 	@Test
@@ -144,29 +142,29 @@ public class UserServiceImplTest {
 		assertEquals(exception.getMessage(),"at least one argument is null");
 	}
 	
+//	°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°READ °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+	
+//	@Test
+//	void getUsersByDTO() {
+//		final UserDTO userDTO=UserDTO.builder()
+//				.surnameDTO("NewSurname01")
+//				.nameDTO("NewName01")
+//				.ageDTO(33)
+//				.emailDTO("newEmail01@email.com")
+//				.build();
+//		
+//		when(userServiceImpl.getUsersByDTO(userDTO));
+//		
+//	}
+//	
+	
+	
 	
 	@Test
-	void getUserByFilter_UserFound() {
+	void getSingleUserByFilter_UserFound() {
 		// da completare				
-		final SearchFilterType searchFilterType=SearchFilterType.EMAIL;
+		final SearchFilterTypeEnum searchFilterType=SearchFilterTypeEnum.EMAIL;
 		
-		final UserDTO userDTO=UserDTO.builder()
-				.surnameDTO("NewSurname01")
-				.nameDTO("NewName01")
-				.ageDTO(33)
-				.emailDTO("newEmail01@email.com")
-				.build();
-		
-		final UserEntity inMemoryUser=UserEntity.builder()
-				.surname("NewSurname01")
-				.name("NewName01")
-				.age(33)
-				.email("newEmail01@email.com")
-				.id(3l)
-				.build();
-		
-		
-
 		
 		when(findByFilterSelection.getOptionalUserEntity(userDTO.getEmailDTO(),searchFilterType)).thenReturn(Optional.of(inMemoryUser));
 		when(fromUserEntityToUserDTO.doMapping(inMemoryUser)).thenReturn(userDTO);
@@ -184,15 +182,8 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void getUserByFilter_UserNotFound() {
-		final SearchFilterType searchFilterType=SearchFilterType.EMAIL;
-		
-		final UserDTO userDTO=UserDTO.builder()
-				.surnameDTO("NewSurname01")
-				.nameDTO("NewName01")
-				.ageDTO(33)
-				.emailDTO("newEmail01@email.com")
-				.build();
+	void getSingleUserByFilter_UserNotFound() {
+		final SearchFilterTypeEnum searchFilterType=SearchFilterTypeEnum.EMAIL;
 		
 		when(findByFilterSelection.getOptionalUserEntity(userDTO.getEmailDTO(),searchFilterType)).thenReturn(Optional.empty());
 		
@@ -208,9 +199,9 @@ public class UserServiceImplTest {
 	}
 	
 	@Test
-	void getUserByFilter_nullArguments() {
+	void getSingleUserByFilter_nullArguments() {
 		
-		final SearchFilterType searchFilterType=SearchFilterType.EMAIL;
+		final SearchFilterTypeEnum searchFilterType=SearchFilterTypeEnum.EMAIL;
 		
 		final String filter=null;
 		
@@ -220,7 +211,7 @@ public class UserServiceImplTest {
 		assertEquals(iae.getMessage(),"at least one argument is null");
 		
 		
-		final SearchFilterType searchFilterType01=null;
+		final SearchFilterTypeEnum searchFilterType01=null;
 		
 		final String filter01="newEmail01@email.com";
 		
@@ -235,6 +226,7 @@ public class UserServiceImplTest {
 	}
 	
 	
+
 	
 	@Test
 	void getAllUsers(){
@@ -269,46 +261,36 @@ public class UserServiceImplTest {
 		
 	}
 	
+//	°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°UPDATE °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+	
 	@Test
 	void updateUserRecordByDto() {
-		
-		final UserDTO userDTO=UserDTO.builder()
-				.surnameDTO("NewSurname01")
-				.nameDTO("NewName01")
-				.ageDTO(44)
-				.emailDTO("Email01@email.com")
-				.build();
 
-		final UserEntity inMemoryUser=UserEntity.builder()
-				.surname("OldSurname01")
-				.name("OldName01")
-				.age(33)
-				.email("Email01@email.com")
-				.id(3l)
-				.build();
 		
 		final UserEntity inMemoryUserUpdated=UserEntity.builder()
 				.surname("NewSurname01")
 				.name("NewName01")
 				.age(44)
-				.email("Email01@email.com")
+				.email("newEmail01@email.com")
 				.id(3l)
 				.build();
 	
 		
-		final String filter="Email01@email.com";
+		final String filter="newEmail01@email.com";
 		
-		when(findByFilterSelection.getOptionalUserEntity(filter,SearchFilterType.EMAIL )).thenReturn(Optional.of(inMemoryUser));
+		when(findByFilterSelection.getOptionalUserEntity(filter,SearchFilterTypeEnum.EMAIL )).thenReturn(Optional.of(inMemoryUser));
 		
 		when(userRepository.save(inMemoryUserUpdated)).thenReturn(inMemoryUserUpdated);
 				
-		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTO, filter, SearchFilterType.EMAIL);
+		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTO, filter, SearchFilterTypeEnum.EMAIL);
 				
-		when(findByFilterSelection.getOptionalUserEntity(userUpdatedId,SearchFilterType.ID)).thenReturn(Optional.of(inMemoryUserUpdated));
+		when(findByFilterSelection.getOptionalUserEntity(userUpdatedId,SearchFilterTypeEnum.ID)).thenReturn(Optional.of(inMemoryUserUpdated));
 
 		when(fromUserEntityToUserDTO.doMapping(inMemoryUserUpdated)).thenReturn(userDTO);
 		
-		UserDTO userRetrived=userServiceImpl.getSingleUserByFilter(userUpdatedId, SearchFilterType.ID);
+		when(userServiceImpl.getSingleUserByFilter(userUpdatedId, SearchFilterTypeEnum.ID)).thenReturn(userDTO);
+		
+		UserDTO userRetrived=userServiceImpl.getSingleUserByFilter(userUpdatedId, SearchFilterTypeEnum.ID);
 		
 		assertEquals(userRetrived.getSurnameDTO(),userDTO.getSurnameDTO());
 		assertEquals(userRetrived.getNameDTO(),userDTO.getNameDTO());
@@ -354,20 +336,20 @@ public class UserServiceImplTest {
 		
 		final String emailFilter="Email01@email.com";
 		
-		when(findByFilterSelection.getOptionalUserEntity(emailFilter,SearchFilterType.EMAIL )).thenReturn(Optional.of(inMemoryUser));
+		when(findByFilterSelection.getOptionalUserEntity(emailFilter,SearchFilterTypeEnum.EMAIL )).thenReturn(Optional.of(inMemoryUser));
 		
 		when(userRepository.save(inMemoryUserUpdated)).thenReturn(inMemoryUserUpdated);
 				
-		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTORequest, emailFilter, SearchFilterType.EMAIL);
+		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTORequest, emailFilter, SearchFilterTypeEnum.EMAIL);
 				
-		when(findByFilterSelection.getOptionalUserEntity(userUpdatedId,SearchFilterType.ID)).thenReturn(Optional.of(inMemoryUserUpdated));
+		when(findByFilterSelection.getOptionalUserEntity(userUpdatedId,SearchFilterTypeEnum.ID)).thenReturn(Optional.of(inMemoryUserUpdated));
 
 		when(fromUserEntityToUserDTO.doMapping(inMemoryUserUpdated)).thenReturn(userDTOResponse);
 		
-		UserDTO userRetrived=userServiceImpl.getSingleUserByFilter(userUpdatedId, SearchFilterType.ID);
+		UserDTO userRetrived=userServiceImpl.getSingleUserByFilter(userUpdatedId, SearchFilterTypeEnum.ID);
 		
-		verify(findByFilterSelection,times(1)).getOptionalUserEntity(emailFilter,SearchFilterType.EMAIL );
-		verify(findByFilterSelection,times(1)).getOptionalUserEntity(userUpdatedId,SearchFilterType.ID );
+		verify(findByFilterSelection,times(1)).getOptionalUserEntity(emailFilter,SearchFilterTypeEnum.EMAIL );
+		verify(findByFilterSelection,times(1)).getOptionalUserEntity(userUpdatedId,SearchFilterTypeEnum.ID );
 		verify(userRepository,times(1)).save(inMemoryUserUpdated);
 		verify(fromUserEntityToUserDTO,times(1)).doMapping(inMemoryUserUpdated);
 
@@ -383,21 +365,14 @@ public class UserServiceImplTest {
 	@Test
 	void updateUserRecordByDto_userNotFound() {
 		
-		final UserDTO userDTO=UserDTO.builder()
-				.surnameDTO("NewSurname01")
-				.nameDTO("NewName01")
-				.ageDTO(44)
-				.emailDTO("Email01@email.com")
-				.build();
-		
 		final String filter="Email01@email.com";
 		
-		when(findByFilterSelection.getOptionalUserEntity(filter,SearchFilterType.EMAIL )).thenReturn(Optional.empty());
-						
-		Long userUpdatedId=userServiceImpl.updateUserRecordByDto(userDTO, filter, SearchFilterType.EMAIL);
-						
-		assertEquals(userUpdatedId,-1L);
+		when(findByFilterSelection.getOptionalUserEntity(filter,SearchFilterTypeEnum.EMAIL )).thenReturn(Optional.empty());
+												
+		RuntimeException re=assertThrows(RuntimeException.class,
+										()->userServiceImpl.updateUserRecordByDto(userDTO, filter, SearchFilterTypeEnum.EMAIL));
 		
+		assertEquals("user : "+String.valueOf(filter) +" update failed", re.getMessage());
 		
 	}
 	

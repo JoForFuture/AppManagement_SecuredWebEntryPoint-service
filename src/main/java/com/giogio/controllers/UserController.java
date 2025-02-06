@@ -10,9 +10,12 @@ import java.util.stream.IntStream;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.giogio.DTO.UserDTO;
 import com.giogio.services.UserService;
+import com.giogio.services.utilities.SearchFilterTypeEnum;
 
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -43,7 +47,7 @@ public class UserController {
 //	CREATE
 	
 	@PostMapping("/save")
-	public ResponseEntity<Long> save(@RequestBody UserDTO userDTO){
+	public ResponseEntity<Long> save(@Validated @RequestBody UserDTO userDTO){
 		try {
 			Long responseId=userService.addUserIfNotPresent(userDTO);
 			return 
@@ -57,6 +61,7 @@ public class UserController {
 	}
 	
 	
+	@Deprecated
 	@PostMapping("/addRandomUsers")
 	public ResponseEntity<List<Long>> addUsers(@RequestParam (defaultValue="5") int amount){
 		List<UserDTO> userEntityListFunctional=
@@ -103,13 +108,15 @@ public class UserController {
 								.build();
 		try {
 			request.userDTOvalidation(request, validator);
-			List<UserDTO> responseList=userService.getUsersByDTO(request);
+			List<UserDTO> responseList=userService.getUsersByDTOFields(request);
 			return new ResponseEntity<List<UserDTO>> ( responseList, HttpStatus.OK);
 
 		}catch(NoSuchElementException nsee) {
+			nsee.printStackTrace();
 			return new ResponseEntity<List<UserDTO>> ( new ArrayList<>() , HttpStatus.NOT_FOUND);
 
 		}catch(RuntimeException re) {
+			re.printStackTrace();
 			return new ResponseEntity<List<UserDTO>> ( new ArrayList<>(), HttpStatus.BAD_REQUEST);
 
 		}
@@ -124,8 +131,21 @@ public class UserController {
 			return ResponseEntity.ok(userService.getAllUsers());
 		} catch (NotFoundException e) {
 			e.printStackTrace();
-			return new ResponseEntity<List<UserDTO>>(new ArrayList<UserDTO>(),
-									  	HttpStatus.NO_CONTENT	);
+			return new ResponseEntity<List<UserDTO>>(new ArrayList<UserDTO>(), HttpStatus.NO_CONTENT	);
+		}
+	}
+	
+//	UPDATE
+	
+	
+	@PutMapping("/update")
+	public ResponseEntity<Long> update(@Validated @RequestBody UserDTO userDTO){
+		try {
+			return new ResponseEntity<Long>(userService.updateUserRecordByDto(userDTO, userDTO.getEmailDTO(), SearchFilterTypeEnum.EMAIL)
+											,HttpStatus.OK);
+		}catch(Exception e) {
+
+			return new ResponseEntity<Long>(-1l,HttpStatus.NO_CONTENT);
 		}
 	}
 	

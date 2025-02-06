@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.giogio.entities.UserEntity;
 import com.giogio.repositories.UserRepository;
 import com.giogio.services.utilities.FindByFilterSelection;
-import com.giogio.services.utilities.SearchFilterType;
+import com.giogio.services.utilities.SearchFilterTypeEnum;
 
 @Primary
 @Qualifier("FindByFilterSelectionImpl_v01")
@@ -26,14 +26,14 @@ public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 	}
 
 	@Override
-	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterType searchFilterType){
+	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterTypeEnum searchFilterType){
 		Optional<UserEntity> user;
 		
 		
 		switch(searchFilterType) {
 		
 		case ID:
-			user=userRepository.findUserEntityById((Long)filter);
+			user=userRepository.findById((Long)filter);
 			return user;
 			
 		case EMAIL:
@@ -48,23 +48,23 @@ public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 	}
 	
 	@Override
-	public List<UserEntity> getUserEntityList(Object filter,SearchFilterType searchFilterType){
+	public List<UserEntity> getUserEntityList(Object filter,SearchFilterTypeEnum searchFilterType){
 		
 		final List<UserEntity> userList=new LinkedList<>();
 		
 		switch(searchFilterType) {
 		
 		case ID:
-			 userRepository.findUserEntityById((Long)filter).ifPresent(user->userList.add(user));
+			 userRepository.findById((Long)filter).ifPresent(user->userList.add(user));
 			 break;
 		case AGE:
-			userRepository.findUserEntityByAge((Integer)filter).ifPresent(list->userList.addAll(list));
+			userRepository.findUserEntitiesByAge((Integer)filter).ifPresent(list->userList.addAll(list));
 			break;
 		case NAME:
-			userRepository.findUserEntityByName((String)filter).ifPresent(list->userList.addAll(list));	
+			userRepository.findUserEntitiesByName((String)filter).ifPresent(list->userList.addAll(list));	
 			break;
 		case SURNAME:
-			userRepository.findUserEntityBySurname((String)filter).ifPresent(list->userList.addAll(list));
+			userRepository.findUserEntitiesBySurname((String)filter).ifPresent(list->userList.addAll(list));
 			break;
 		case EMAIL:
 			userRepository.findUserEntityByEmail((String)filter).ifPresent(user->userList.add(user));
@@ -72,7 +72,7 @@ public class FindByFilterSelectionImpl_v01 implements FindByFilterSelection {
 		case NAME_SURNAME:	
 			String nameSurname=(String)filter;
 			String[] nameSurnameArray=nameSurname.split("_");
-			userRepository.findUserEntityByNameAndSurnameIgnoreCase(nameSurnameArray[0],nameSurnameArray[1]).ifPresent(list->userList.addAll(list));
+			userRepository.findUserEntitiesByNameAndSurnameIgnoreCase(nameSurnameArray[0],nameSurnameArray[1]).ifPresent(list->userList.addAll(list));
 			break;
 		default:
 			throw new RuntimeException("wrong filter type");

@@ -7,9 +7,9 @@ import com.giogio.entities.UserEntity;
 
 public interface FindByFilterSelection {
 	
-	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterType searchFilterType);
+	public Optional<UserEntity> getOptionalUserEntity(Object filter,SearchFilterTypeEnum searchFilterType);
 
-	List<UserEntity> getUserEntityList(Object filter, SearchFilterType searchFilterType);
+	List<UserEntity> getUserEntityList(Object filter, SearchFilterTypeEnum searchFilterType);
 	
 
 }
